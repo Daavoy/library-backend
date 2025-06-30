@@ -1,11 +1,11 @@
 package com.example.backend.DTO;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-public class BookUpdateDTO {
+
+public class BookDTO {
     private Long id;
     private String title;
     private String author;
@@ -14,14 +14,7 @@ public class BookUpdateDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate publicationYear;
     private String thumbnailBase64;
-
-    public BookUpdateDTO(String title, String author, String description, String isbn, LocalDate publicationYear) {
-        this.title = title;
-        this.author = author;
-        this.description = description;
-        this.isbn = isbn;
-        this.publicationYear = publicationYear;
-    }
+    public BookDTO() {}
 
     public Long getId() {
         return id;
@@ -38,7 +31,6 @@ public class BookUpdateDTO {
         this.thumbnailBase64 = thumbnailBase64;
     }
 
-    public BookUpdateDTO() {}
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
     public String getAuthor() { return author; }

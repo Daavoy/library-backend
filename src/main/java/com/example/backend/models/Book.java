@@ -1,10 +1,11 @@
 package com.example.backend.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+import java.util.Arrays;
 
 @Entity
 public class Book {
@@ -15,12 +16,18 @@ public class Book {
     private String author;
     private String description;
     private String isbn;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate publicationYear;
 
-    public Book(String title, String author, String description, String isbn) {
+    @Column(name = "thumbnail")
+    private byte[] thumbnail;
+
+    public Book(String title, String author, String description, String isbn, LocalDate publicationYear) {
         this.title = title;
         this.author = author;
         this.description = description;
         this.isbn = isbn;
+        this.publicationYear = publicationYear;
     }
 
     public String getIsbn() {
@@ -45,6 +52,8 @@ public class Book {
                 ", author='" + author + '\'' +
                 ", description='" + description + '\'' +
                 ", isbn='" + isbn + '\'' +
+                ", publicationYear=" + publicationYear +
+                ", thumbnail=" + Arrays.toString(thumbnail) +
                 '}';
     }
 
@@ -64,6 +73,10 @@ public class Book {
         return description;
     }
 
+    public byte[] getThumbnail() { return thumbnail; }
+
+    public LocalDate getPublicationYear() { return publicationYear; }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -79,4 +92,7 @@ public class Book {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public void setThumbnail(byte[] thumbnail) { this.thumbnail = thumbnail; }
+    public void setPublicationYear(LocalDate publicationYear) { this.publicationYear = publicationYear; }
 }
