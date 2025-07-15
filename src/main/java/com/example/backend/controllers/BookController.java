@@ -6,15 +6,19 @@ import com.example.backend.DTO.BookUpdateDTO;
 import com.example.backend.models.Book;
 import com.example.backend.services.BookService;
 import exceptions.BookNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -35,7 +39,15 @@ public class BookController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BookDTO> createBook(@ModelAttribute BookFormDTO form) throws IOException {
+    public ResponseEntity<?> createBook(@Valid @ModelAttribute BookFormDTO form, BindingResult bindingResult) throws IOException {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errors);
+        }
+
         BookUpdateDTO dto = new BookUpdateDTO(
                 form.getTitle(),
                 form.getAuthor(),

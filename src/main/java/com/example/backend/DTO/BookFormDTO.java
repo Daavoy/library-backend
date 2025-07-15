@@ -1,5 +1,6 @@
 package com.example.backend.DTO;
 
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -7,6 +8,7 @@ import java.time.LocalDate;
 
 
 public class BookFormDTO {
+    @NotEmpty(message = "Title can't be empty")
     private String title;
     private String author;
     private String description;
