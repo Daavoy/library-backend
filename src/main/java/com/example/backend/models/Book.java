@@ -1,6 +1,6 @@
 package com.example.backend.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -18,6 +18,19 @@ public class Book {
     private String isbn;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate publicationYear;
+
+    public Bookshelf getBookshelf() {
+        return bookshelf;
+    }
+
+    public void setBookshelf(Bookshelf bookshelf) {
+        this.bookshelf = bookshelf;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "bookshelf_id")
+    private Bookshelf bookshelf;
+
 
     @Column(name = "thumbnail")
     private byte[] thumbnail;

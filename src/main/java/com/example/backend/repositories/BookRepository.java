@@ -10,4 +10,5 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findByTitle(String title);
     Book findById(long id);
+    void deleteById(long id);
 }
