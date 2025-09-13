@@ -19,10 +19,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -38,8 +37,9 @@ public class AuthController {
         return "Welcome this endpoint is not secure";
     }
 
-    @PostMapping("/addNewUser")
-    public UserInfo addNewUser(@RequestBody UserInfo user) {
+    @PostMapping("/register")
+    public UserInfo register(@RequestBody UserInfo user) {
+        user.setRoles("ROLE_USER");
         return service.addUser(user);
     }
 
