@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.backend.models.UserInfoDetails;
 
+import java.util.Optional;
+
 @Service
 public class UserInfoService implements UserDetailsService {
 
@@ -20,6 +22,10 @@ public class UserInfoService implements UserDetailsService {
     public UserInfoService(UserInfoRepository repository, PasswordEncoder encoder) {
         this.repository = repository;
         this.encoder = encoder;
+    }
+
+    public Optional<UserInfo> findByUsername(String username) {
+        return repository.findByUsername(username);
     }
 
     @Override

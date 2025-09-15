@@ -8,6 +8,7 @@ import exceptions.TokenRefreshException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -15,10 +16,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/auth")
@@ -38,12 +42,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public UserInfo register(@RequestBody UserInfo user) {
+    public ResponseEntity<?> register(@RequestBody UserInfo user) {
+        Optional<UserInfo> existingUser = service.findByUsername(user.getUsername());
+        if (existingUser.isPresent())    return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body("Conflict: User with username already exists");
         user.setRoles("ROLE_USER");
-        return service.addUser(user);
+        user.setRoles("ROLE_USER");
+        UserInfo createdUser = service.addUser(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateAndGetToken( @RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
