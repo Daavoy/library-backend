@@ -1,6 +1,5 @@
 package com.example.backend.controllers;
 
-import com.example.backend.DTO.BookDTO;
 import com.example.backend.DTO.BookFormDTO;
 import com.example.backend.DTO.BookUpdateDTO;
 import com.example.backend.models.Book;
@@ -40,6 +39,7 @@ public class BookController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createBook(@Valid @ModelAttribute BookFormDTO form, BindingResult bindingResult) throws IOException {
+
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
