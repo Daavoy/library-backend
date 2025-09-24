@@ -2,11 +2,16 @@ package com.example.backend.models;
 
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 public class Book {
     @Id
@@ -16,21 +21,21 @@ public class Book {
     private String author;
     private String description;
     private String isbn;
+    private boolean isFavourite;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate publicationYear;
-
-    public Bookshelf getBookshelf() {
-        return bookshelf;
-    }
-
-    public void setBookshelf(Bookshelf bookshelf) {
-        this.bookshelf = bookshelf;
-    }
 
     @ManyToOne
     @JoinColumn(name = "bookshelf_id")
     private Bookshelf bookshelf;
 
+    @ManyToMany
+    @JoinTable(
+            name = "book_category",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories;
 
     @Column(name = "thumbnail")
     private byte[] thumbnail;
@@ -41,18 +46,6 @@ public class Book {
         this.description = description;
         this.isbn = isbn;
         this.publicationYear = publicationYear;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public Book(){}
@@ -73,39 +66,4 @@ public class Book {
     public Book(String title) {
         this.title = title;
     }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public byte[] getThumbnail() { return thumbnail; }
-
-    public LocalDate getPublicationYear() { return publicationYear; }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setThumbnail(byte[] thumbnail) { this.thumbnail = thumbnail; }
-    public void setPublicationYear(LocalDate publicationYear) { this.publicationYear = publicationYear; }
 }
