@@ -1,6 +1,5 @@
 package com.example.backend.services;
 
-import com.example.backend.models.Book;
 import com.example.backend.models.Category;
 import com.example.backend.repositories.CategoryRepository;
 

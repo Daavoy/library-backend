@@ -1,6 +1,7 @@
 package com.example.backend.models;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ public class Book {
     private String author;
     private String description;
     private String isbn;
+    @Column(name = "is_favorite")
     private boolean isFavourite;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate publicationYear;
@@ -35,6 +37,7 @@ public class Book {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    @JsonManagedReference
     private Set<Category> categories;
 
     @Column(name = "thumbnail")

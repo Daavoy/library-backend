@@ -1,5 +1,6 @@
 package com.example.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class Category {
         this.alternativeName = alternativeName;
     }
     @ManyToMany(mappedBy = "categories")
+    @JsonBackReference
     private Set<Book> books;
 
 }
