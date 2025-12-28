@@ -28,7 +28,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
     public void deleteCategoryById(long id) {
-        Category category =categoryRepository.findById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BookNotFoundException(id));
         categoryRepository.delete(category);
     }
