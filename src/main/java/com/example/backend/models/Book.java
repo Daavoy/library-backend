@@ -26,6 +26,7 @@ public class Book {
     private boolean isFavourite;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate publicationYear;
+    private Integer totalPages;
 
     @ManyToOne
     @JoinColumn(name = "bookshelf_id")
@@ -50,7 +51,11 @@ public class Book {
         this.isbn = isbn;
         this.publicationYear = publicationYear;
     }
-
+    public Book(String title, String author, Integer totalPages) {
+        this.title = title;
+        this.author = author;
+        this.totalPages = totalPages;
+    }
     public Book(){}
 
     @Override

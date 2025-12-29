@@ -1,9 +1,11 @@
 package com.example.backend.services;
 
+import com.example.backend.models.UserInfo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +22,8 @@ public class JwtService {
     private String secret;
     @Value("${jwt.expiration.access}")
     private int access;
+    @Autowired
+    UserInfoService userInfoService;
 
     public String generateToken(UserDetails user) {
         Map<String, Object> claims = new HashMap<>();
@@ -65,5 +69,15 @@ public class JwtService {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    /**
+     * Retrieves the user id from the current user's access token
+     * @param token
+     * @return
+     */
+    public Long getUserIdFromToken(String token) {
+        String userName = extractUsername(token);
+        return userInfoService.findByUsername(userName).map(UserInfo::getId).orElse(null);
     }
 }
