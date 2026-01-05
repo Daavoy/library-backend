@@ -2,6 +2,7 @@ package com.example.backend.controllers;
 
 import com.example.backend.DTO.BookFormDTO;
 import com.example.backend.DTO.BookUpdateDTO;
+import com.example.backend.mapper.BookMapper;
 import com.example.backend.models.Book;
 import com.example.backend.services.BookService;
 import exceptions.BookNotFoundException;
@@ -25,6 +26,8 @@ import java.util.Optional;
 public class BookController {
     @Autowired
     private BookService bookService;
+    @Autowired
+    private BookMapper bookMapper;
 
     @GetMapping
     public ResponseEntity<List<Book>> getAllBooks() {
@@ -33,7 +36,7 @@ public class BookController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable("id") Long id) {
-        Optional<Book> book = bookService.getBookById(id);
+        Optional<Book> book = Optional.ofNullable(bookService.getBookById(id));
         return book.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -59,7 +62,7 @@ public class BookController {
         byte[] thumbnail = form.getThumbnail() != null ? form.getThumbnail().getBytes() : null;
 
         Book saved = bookService.createBook(dto, thumbnail);
-        return ResponseEntity.status(HttpStatus.CREATED).body(bookService.mapToDTO(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookMapper.toDto(saved));
     }
 
     @DeleteMapping("/{id}")

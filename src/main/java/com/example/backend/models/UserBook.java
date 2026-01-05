@@ -8,14 +8,16 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-public class UserBooks {
+public class UserBook {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "user_id")
     private UserInfo user;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "book_id")
     private Book book;
 
     @Enumerated(EnumType.STRING)
@@ -24,15 +26,17 @@ public class UserBooks {
     private Integer currentPage;
     private LocalDate startedAt;
     private LocalDate finishedAt;
+    private String notes;
+    private Boolean isFavorite = false;
 
     @Version
     private Long version;
 
-    public UserBooks() {}
+    public UserBook() {}
 
     @Override
     public String toString() {
-        return "UserBooks{" +
+        return "UserBook{" +
                 "id=" + id +
                 ", user=" + user +
                 ", book=" + book +

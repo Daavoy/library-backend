@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.models.*;
+import com.example.backend.repositories.UserInfoRepository;
 import com.example.backend.services.JwtService;
 import com.example.backend.services.RefreshTokenService;
 import com.example.backend.services.UserInfoService;
@@ -28,6 +29,7 @@ import java.util.Optional;
 public class AuthController {
 
     private final UserInfoService service;
+    private final UserInfoRepository userInfoRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     @Autowired
@@ -45,7 +47,6 @@ public class AuthController {
         if (existingUser.isPresent())    return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body("Conflict: User with username already exists");
-        user.setRoles("ROLE_USER");
         user.setRoles("ROLE_USER");
         UserInfo createdUser = service.addUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
@@ -78,6 +79,11 @@ public class AuthController {
                 })
                 .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
                         "Refresh token is not in database!"));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserInfo>> getAllUsers() {
+        return ResponseEntity.ok(userInfoRepository.findAll());
     }
 
 }

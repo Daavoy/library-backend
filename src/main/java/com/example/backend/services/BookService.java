@@ -1,52 +1,40 @@
 package com.example.backend.services;
 
-import com.example.backend.DTO.BookDTO;
 import com.example.backend.DTO.BookUpdateDTO;
+import com.example.backend.mapper.BookMapper;
 import com.example.backend.models.Book;
 import exceptions.BookNotFoundException;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import com.example.backend.repositories.BookRepository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class BookService {
-    private final BookRepository bookRepository;
-    @Autowired
-    public BookService(BookRepository bookRepository) {
-        this.bookRepository = bookRepository;
-    }
-    public BookDTO mapToDTO(Book book) {
-        BookDTO dto = new BookDTO();
-        dto.setId(book.getId());
-        dto.setTitle(book.getTitle());
-        dto.setAuthor(book.getAuthor());
-        dto.setDescription(book.getDescription());
-        dto.setIsbn(book.getIsbn());
-        dto.setPublicationYear(book.getPublicationYear());
 
-        if (book.getThumbnail() != null) {
-            String base64 = Base64.getEncoder().encodeToString(book.getThumbnail());
-            dto.setThumbnailBase64(base64);
-        }
-        return dto;
+    private final BookRepository bookRepository;
+    private final BookMapper bookMapper;
+    private final Object bookCreationLock = new Object();
+    public BookService(BookRepository bookRepository,
+                       BookMapper bookMapper) {
+        this.bookRepository = bookRepository;
+        this.bookMapper = bookMapper;
     }
-    private Book mapToEntity(BookUpdateDTO bookUpdateDTO) {
-        return new Book(bookUpdateDTO.getTitle(), bookUpdateDTO.getAuthor(), bookUpdateDTO.getDescription(), bookUpdateDTO.getIsbn(), bookUpdateDTO.getPublicationYear());
-    }
+
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
-    public Optional<Book> getBookById(Long id) {
-        return bookRepository.findById(id);
+
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException(id));
     }
 
-    public Book createBook(BookUpdateDTO bookDTO, byte[] thumbnail) {
-        Book book = new Book();
-        BeanUtils.copyProperties(bookDTO, book);
+    public Book createBook(BookUpdateDTO dto, byte[] thumbnail) {
+        Book book = bookMapper.toEntity(dto);
         book.setThumbnail(thumbnail);
         return bookRepository.save(book);
     }
@@ -56,11 +44,26 @@ public class BookService {
         bookRepository.delete(book);
     }
 
-    public Book updateBook(Long id, BookUpdateDTO bookUpdateDTO, byte[] thumbnail) {
-        Book existingBook = bookRepository.findById(id)
-                .orElseThrow(() -> new BookNotFoundException(id));
-        BeanUtils.copyProperties(bookUpdateDTO, existingBook, "id");
-        return bookRepository.save(existingBook);
+    public Book updateBook(Long id, BookUpdateDTO dto, byte[] thumbnail) {
+        Book book = getBookById(id);
+        bookMapper.updateEntity(dto, book);
+        book.setThumbnail(thumbnail);
+        return bookRepository.save(book);
     }
 
+    @Transactional
+    public Book getOrCreate(String title, String author, int totalPages) {
+        List<Book> books =
+                bookRepository.findAllByTitleIgnoreCaseAndAuthorIgnoreCase(title, author);
+
+        if (!books.isEmpty()) {
+            return books.get(0);
+        }
+        Book book = new Book();
+        book.setTitle(title);
+        book.setAuthor(author);
+        book.setTotalPages(totalPages);
+
+        return bookRepository.save(book);
+    }
 }

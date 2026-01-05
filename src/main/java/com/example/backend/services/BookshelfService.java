@@ -21,7 +21,7 @@ public class BookshelfService  {
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
-    public Book getBookById(int id) {
+    public Optional<Book> getBookById(long id) {
         return bookRepository.findById(id);
     }
     public List<Bookshelf> getAllBookshelves() {
