@@ -1,5 +1,7 @@
 package com.example.backend.services;
 
+import com.example.backend.DTO.RegisterRequest;
+import com.example.backend.models.Role;
 import com.example.backend.models.UserInfo;
 import com.example.backend.repositories.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.example.backend.models.UserInfoDetails;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserInfoService implements UserDetailsService {
@@ -35,8 +38,11 @@ public class UserInfoService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    public UserInfo addUser(UserInfo userInfo) {
-        userInfo.setPassword(encoder.encode(userInfo.getPassword()));
+    public UserInfo addUser(RegisterRequest request) {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUsername(request.getUsername());
+        userInfo.setPassword(encoder.encode(request.getPassword()));
+        userInfo.setRoles(Set.of(Role.ROLE_USER));
         return repository.save(userInfo);
     }
 }

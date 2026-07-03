@@ -1,4 +1,4 @@
-package com.example.backend.models;
+package com.example.backend.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 

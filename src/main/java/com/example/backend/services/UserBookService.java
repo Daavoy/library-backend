@@ -2,12 +2,12 @@ package com.example.backend.services;
 
 import com.example.backend.DTO.AddUserBookDTO;
 import com.example.backend.DTO.UserBookDTO;
+import com.example.backend.DTO.UserBookUpdateDTO;
 import com.example.backend.mapper.UserBookMapper;
 import com.example.backend.models.*;
 import com.example.backend.repositories.UserBookRepository;
 import com.example.backend.repositories.UserInfoRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class UserBookService {
     private final UserBookRepository userBookRepository;
     private final UserInfoRepository userInfoRepository;
     private final UserBookMapper userBookMapper;
-    private final Object lock = new Object();
+
 
     public UserBookService(BookService bookService,
                            UserBookRepository userBookRepository,
@@ -32,16 +32,18 @@ public class UserBookService {
         this.userBookMapper = userBookMapper;
     }
 
+    @Transactional
     public UserBookDTO addToLibrary(Long userId, AddUserBookDTO req) {
         Book book = bookService.getOrCreate(req.getTitle(), req.getAuthor(),req.getTotalPages());
         return saveUserBook(userId, book, req.getReadingStatus());
     }
 
+    @Transactional
     public UserBookDTO saveUserBook(Long userId, Book book, ReadingStatus status) {
         UserInfo user = userInfoRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        boolean alreadyExists = userBookRepository.existsByUserAndBook(user, book);
+        boolean alreadyExists = userBookRepository.existsByUserIdAndBookId(user.getId(), book.getId());
         if (alreadyExists) {
             throw new IllegalStateException("Book already in library");
         }
@@ -51,10 +53,10 @@ public class UserBookService {
         userBook.setBook(book);
         userBook.setStatus(status != null ? status : ReadingStatus.PLANNED);
 
-        userBook = userBookRepository.save(userBook);  
-        return userBookMapper.toDto(userBook);
+        return userBookMapper.toDto(userBookRepository.save(userBook));
     }
 
+    @Transactional(readOnly = true)
     public List<UserBookDTO> findAllDTO() {
         return userBookRepository.findAll()
                 .stream()
@@ -62,19 +64,39 @@ public class UserBookService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserBookDTO> findAllForUser(Long userId) {
-        UserInfo user = userInfoRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        return userBookRepository.findAllByUser(user)
+        return userBookRepository.findAllByUserId(userId)
                 .stream()
                 .map(userBookMapper::toDto)
                 .toList();
     }
 
-    public Optional<UserBookDTO> findByIdDTO(Long id) {
-        return userBookRepository.findById(id)
-                .map(userBookMapper::toDto);
+    @Transactional(readOnly = true)
+    public Optional<UserBookDTO> findForUserAndBook(Long userId, Long bookId) {
+        return userBookRepository.findByUserIdAndBookId(userId,bookId).map(userBookMapper::toDto);
+    }
+
+    @Transactional
+    public Optional<UserBookDTO> updateForUser(Long userId, Long bookId, UserBookUpdateDTO dto) {
+        return userBookRepository.findByUserIdAndBookId(userId,bookId).map(userBook -> {
+            if (dto.getCurrentPage() != null) {
+                userBook.setCurrentPage(dto.getCurrentPage());
+            }
+            if (dto.getIsFavorite() != null) {
+                userBook.setIsFavorite(dto.getIsFavorite());
+            }
+            if (dto.getNotes() != null) {
+                userBook.setNotes(dto.getNotes());
+            }
+            return userBookMapper.toDto(userBookRepository.save(userBook));
+        });
+    }
+
+    @Transactional
+    public void deleteForUser(Long userId, Long bookId) {
+        userBookRepository.deleteByUserIdAndBookId(userId, bookId);
     }
 
     @Transactional

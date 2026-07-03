@@ -21,13 +21,14 @@ public class UserBook {
     private Book book;
 
     @Enumerated(EnumType.STRING)
-    private ReadingStatus status;
+    private ReadingStatus status = ReadingStatus.PLANNED;
 
     private Integer currentPage;
     private LocalDate startedAt;
     private LocalDate finishedAt;
     private String notes;
     private Boolean isFavorite = false;
+    private Double rating = 0d;
 
     @Version
     private Long version;
@@ -44,6 +45,9 @@ public class UserBook {
                 ", currentPage=" + currentPage +
                 ", startedAt=" + startedAt +
                 ", finishedAt=" + finishedAt +
+                ", notes='" + notes + '\'' +
+                ", isFavorite=" + isFavorite +
+                ", rating=" + rating +
                 ", version=" + version +
                 '}';
     }

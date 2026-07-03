@@ -1,56 +1,64 @@
 package com.example.backend.mapper;
 
-import com.example.backend.DTO.BookDTO;
-import com.example.backend.DTO.BookUpdateDTO;
+
+import com.example.backend.DTO.BookRequest;
+import com.example.backend.DTO.BookResponse;
+import com.example.backend.DTO.CategoryResponse;
 import com.example.backend.models.Book;
 import org.springframework.stereotype.Component;
-
-import java.util.Base64;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class BookMapper {
 
-    public BookDTO toDto(Book book) {
+    public BookResponse toResponse(Book book) {
         if (book == null) {
             return null;
         }
-
-        BookDTO dto = new BookDTO();
-        dto.setId(book.getId());
-        dto.setTitle(book.getTitle());
-        dto.setAuthor(book.getAuthor());
-        dto.setDescription(book.getDescription());
-        dto.setIsbn(book.getIsbn());
-        dto.setPublicationYear(book.getPublicationYear());
-
-        if (book.getThumbnail() != null) {
-            dto.setThumbnailBase64(
-                    Base64.getEncoder().encodeToString(book.getThumbnail())
-            );
-        }
-
-        return dto;
-    }
-
-    public Book toEntity(BookUpdateDTO dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        return new Book(
-                dto.getTitle(),
-                dto.getAuthor(),
-                dto.getDescription(),
-                dto.getIsbn(),
-                dto.getPublicationYear()
+        BookResponse response = new BookResponse();
+        response.setId(book.getId());
+        response.setTitle(book.getTitle());
+        response.setAuthor(book.getAuthor());
+        response.setDescription(book.getDescription());
+        response.setIsbn(book.getIsbn());
+        response.setPublicationYear(book.getPublicationYear());
+        response.setTotalPages(book.getTotalPages());
+        response.setHasThumbnail(book.getThumbnail() != null);
+        response.setCategories(
+                book.getCategories() == null ? Set.of() :
+                        book.getCategories().stream()
+                                .map(CategoryResponse::new)
+                                .collect(Collectors.toSet())
         );
+
+
+        return response;
     }
 
-    public void updateEntity(BookUpdateDTO dto, Book entity) {
-        entity.setTitle(dto.getTitle());
-        entity.setAuthor(dto.getAuthor());
-        entity.setDescription(dto.getDescription());
-        entity.setIsbn(dto.getIsbn());
-        entity.setPublicationYear(dto.getPublicationYear());
+    public Book toEntity(BookRequest request) {
+        if (request == null) return null;
+
+        Book book = new Book();
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setDescription(request.getDescription());
+        book.setIsbn(request.getIsbn());
+        book.setPublicationYear(request.getPublicationYear());
+        book.setTotalPages(request.getTotalPages());
+
+        return book;
+    }
+    public void updateEntity(BookRequest request, Book book) {
+        if (request == null) return;
+
+        book.setTitle(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setDescription(request.getDescription());
+        book.setIsbn(request.getIsbn());
+        book.setPublicationYear(request.getPublicationYear());
+        book.setTotalPages(request.getTotalPages());
+        // Thumbnail is only updated if the caller explicitly passes one
+        // That logic stays in the service, not here
     }
 }

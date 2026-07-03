@@ -1,8 +1,15 @@
 package com.example.backend.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Getter
+@Setter
 public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -10,46 +17,23 @@ public class UserInfo {
     @Column(unique = true)
     private String username;
     private String password;
-    private String roles;
-
-    public UserInfo(String username, String password, String roles) {
+    // EAGER fetch because roles are needed immediately during authentication
+    // (Spring Security loads UserDetails synchronously) — lazy loading here
+    // would risk a LazyInitializationException outside a transaction
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    @Enumerated(EnumType.STRING) // store "ROLE_USER" not the ordinal (0, 1, ...)
+    @Column(name = "role")
+    private Set<Role> roles = new HashSet<>();
+    public UserInfo(String username, String password, Set<Role> roles) {
         this.username = username;
         this.password = password;
         this.roles = roles;
     }
 
     public UserInfo() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getRoles() {
-        return roles;
-    }
-
-    public void setRoles(String roles) {
-        this.roles = roles;
     }
 }
